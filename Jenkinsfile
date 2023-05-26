@@ -1,4 +1,4 @@
-def agentLabel = env.JOB_NAME.contains('master') ? "phx-large" : "large"
+def agentLabel = env.JOB_NAME.contains('main') ? "phx-large" : "large"
 def BASE_IMAGE = ""
 
 pipeline {
@@ -40,8 +40,7 @@ pipeline {
         DOCKER_REPO_URL = "https://" + "${params.DOCKER_REPO}"
         DOCKER_PUBLISH_IMAGE_NAME = 'cert-manager-webhook-oci'
         DOCKER_CI_IMAGE_NAME = 'cert-manager-webhook-oci-jenkins'
-        // DOCKER_IMAGE_NAME = "${env.BRANCH_NAME ==~ /^release-.*/ || env.BRANCH_NAME == 'master' ? env.DOCKER_PUBLISH_IMAGE_NAME : env.DOCKER_CI_IMAGE_NAME}"
-        DOCKER_IMAGE_NAME = "${params.DOCKER_REPO}/${params.DOCKER_NAMESPACE}/${env.BRANCH_NAME ==~ /^release-.*/ || env.BRANCH_NAME == 'master' ? env.DOCKER_PUBLISH_IMAGE_NAME : env.DOCKER_CI_IMAGE_NAME}"
+        DOCKER_IMAGE_NAME = "${params.DOCKER_REPO}/${params.DOCKER_NAMESPACE}/${env.BRANCH_NAME ==~ /^release-.*/ || env.BRANCH_NAME == 'main' ? env.DOCKER_PUBLISH_IMAGE_NAME : env.DOCKER_CI_IMAGE_NAME}"
 	    DOCKER_IMAGE_TAG = get_image_tag()
 
         // File containing base image information
