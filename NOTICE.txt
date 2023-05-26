@@ -1,0 +1,6 @@
+The Initial Developer of cert-manager-webhook-oci (https://github.com/cert-manager/webhook-example) is cert-manager (https://cert-manager.io/).
+ Copyright 2019 The cert-manager Authors. All Rights Reserved.
+
+This project also contains the work of the
+cert-manager-webhook-oci project authors (https://gitlab.com/dn13/cert-manager-webhook-oci).
+Copyright 2020 The ACME webhook for Oracle Cloud Infrastructure Authors. All Rights Reserved.
