@@ -28,6 +28,17 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{/*
+Default the Cert-Manager clusterResourceNamespace to the Cert-Manager namespace if not explicitly set
+*/}}
+{{- define "cert-manager-webhook-oci.clusterResourceNamespace" -}}
+{{- if .Values.certManager.clusterResourceNamespace -}}
+{{- printf "%s" .Values.certManager.clusterResourceNamespace -}}
+{{- else -}}
+{{- printf "%s" .Values.certManager.namespace -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "cert-manager-webhook-oci.chart" -}}
@@ -49,3 +60,4 @@ Create chart name and version as used by the chart label.
 {{- define "cert-manager-webhook-oci.servingCertificate" -}}
 {{ printf "%s-webhook-tls" (include "cert-manager-webhook-oci.fullname" .) }}
 {{- end -}}
+
