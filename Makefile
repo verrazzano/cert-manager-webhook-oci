@@ -31,6 +31,17 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+# Construct the build argument based on current Architecture (ARM or AMD)
+ARCH := $(shell uname -m)
+ifeq ($(ARCH),x86_64)
+	EXEC_DIR_PATH:= bin/linux_amd64
+	BUILD_CMD:= go-build-linux-amd
+	BUILD_CMD_DEBUG:= go-build-linux-amd-debug
+else ifeq ($(ARCH),aarch64)
+	EXEC_DIR_PATH:= bin/linux_arm64
+	BUILD_CMD:= go-build-linux-arm
+	BUILD_CMD_DEBUG:= go-build-linux-arm-debug
+endif
 
 
 # Setting SHELL to bash allows bash commands to be executed by recipes.
@@ -90,22 +101,39 @@ go-build:
 		-o bin/$(shell uname)_$(shell uname -m)/${NAME} \
 		main.go
 
-.PHONY: go-build-linux
-go-build-linux:
+.PHONY: go-build-linux-amd
+go-build-linux-amd:
 	GOOS=linux GOARCH=amd64 $(GO) build \
 		-ldflags "-s -w ${GO_LDFLAGS}" \
 		-o bin/linux_amd64/${NAME} \
 		main.go
 
-.PHONY: go-build-linux-debug
-go-build-linux-debug:
+.PHONY: go-build-linux-amd-debug
+go-build-linux-amd-debug:
 	GOOS=linux GOARCH=amd64 $(GO) build \
 		-ldflags "${GO_LDFLAGS}" \
 		-o out/linux_amd64/${NAME} \
 		main.go
 
+.PHONY: go-build-linux-arm
+go-build-linux-arm:
+	GOOS=linux GOARCH=arm64 $(GO) build \
+		-ldflags "-s -w ${GO_LDFLAGS}" \
+		-o bin/linux_arm64/${NAME} \
+		main.go
+
+.PHONY: go-build-linux-debug-arm
+go-build-linux-debug-arm:
+	GOOS=linux GOARCH=arm64 $(GO) build \
+		-ldflags "${GO_LDFLAGS}" \
+		-o out/linux_arm64/${NAME} \
+		main.go
+
 .PHONY: docker-build
-docker-build: go-build-linux docker-build-common
+docker-build: $(BUILD_CMD) docker-build-common
+
+.PHONY: docker-build-debug
+docker-build: $(BUILD_CMD_DEBUG) docker-build-common
 
 .PHONY: docker-build-common
 docker-build-common:
@@ -113,7 +141,7 @@ docker-build-common:
 	docker build --pull \
 		--build-arg BASE_IMAGE=${BASE_IMAGE} \
 		--build-arg EXEC_NAME=${NAME} \
-		--build-arg EXEC_DIR=bin/linux_amd64 \
+		--build-arg EXEC_DIR=${EXEC_DIR_PATH} \
 		-t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} .
 
 .PHONY: docker-push
