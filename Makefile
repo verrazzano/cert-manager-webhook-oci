@@ -31,6 +31,19 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+# Construct the build argument based on current Architecture (ARM or AMD)
+ARCH := $(shell uname -m)
+ifeq ($(ARCH),x86_64)
+	EXEC_DIR_PATH:= bin/linux_amd64
+	BUILD_CMD:= go-build-linux-amd
+	BUILD_CMD_DEBUG:= go-build-linux-amd-debug
+	BASE_IMAGE ?= ghcr.io/verrazzano/verrazzano-base:v1.0.0-20230327155846-4653b27@sha256:e82f7e630719a9f5a7309c41773385b273ec749f0e1ded96baa1a3f7a7e576e0
+else ifeq ($(ARCH),aarch64)
+	EXEC_DIR_PATH:= bin/linux_arm64
+	BUILD_CMD:= go-build-linux-arm
+	BUILD_CMD_DEBUG:= go-build-linux-arm-debug
+	BASE_IMAGE ?= ghcr.io/oracle/oraclelinux:8-slim
+endif
 
 
 # Setting SHELL to bash allows bash commands to be executed by recipes.
@@ -40,7 +53,6 @@ SHELL = /usr/bin/env bash -o pipefail
 
 NAME ?= cert-manager-webhook-oci
 REPO_NAME:=cert-manager-webhook-oci
-BASE_IMAGE ?= ghcr.io/verrazzano/verrazzano-base:v1.0.0-20230327155846-4653b27@sha256:e82f7e630719a9f5a7309c41773385b273ec749f0e1ded96baa1a3f7a7e576e0
 
 CREATE_LATEST_TAG=0
 DOCKER_IMAGE_TAG ?= local-$(shell git rev-parse --short HEAD)
@@ -90,22 +102,36 @@ go-build:
 		-o bin/$(shell uname)_$(shell uname -m)/${NAME} \
 		main.go
 
-.PHONY: go-build-linux
-go-build-linux:
+.PHONY: go-build-linux-amd
+go-build-linux-amd:
 	GOOS=linux GOARCH=amd64 $(GO) build \
 		-ldflags "-s -w ${GO_LDFLAGS}" \
 		-o bin/linux_amd64/${NAME} \
 		main.go
 
-.PHONY: go-build-linux-debug
-go-build-linux-debug:
+.PHONY: go-build-linux-amd-debug
+go-build-linux-amd-debug:
 	GOOS=linux GOARCH=amd64 $(GO) build \
 		-ldflags "${GO_LDFLAGS}" \
 		-o out/linux_amd64/${NAME} \
 		main.go
 
+.PHONY: go-build-linux-arm
+go-build-linux-arm:
+	GOOS=linux GOARCH=arm64 $(GO) build \
+		-ldflags "-s -w ${GO_LDFLAGS}" \
+		-o bin/linux_arm64/${NAME} \
+		main.go
+
+.PHONY: go-build-linux-arm-debug
+go-build-linux-arm-debug:
+	GOOS=linux GOARCH=arm64 $(GO) build \
+		-ldflags "${GO_LDFLAGS}" \
+		-o out/linux_arm64/${NAME} \
+		main.go
+
 .PHONY: docker-build
-docker-build: go-build-linux docker-build-common
+docker-build: $(BUILD_CMD) docker-build-common
 
 .PHONY: docker-build-common
 docker-build-common:
@@ -113,7 +139,7 @@ docker-build-common:
 	docker build --pull \
 		--build-arg BASE_IMAGE=${BASE_IMAGE} \
 		--build-arg EXEC_NAME=${NAME} \
-		--build-arg EXEC_DIR=bin/linux_amd64 \
+		--build-arg EXEC_DIR=${EXEC_DIR_PATH} \
 		-t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} .
 
 .PHONY: docker-push
