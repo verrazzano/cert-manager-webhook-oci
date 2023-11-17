@@ -4,7 +4,7 @@
 OS ?= $(shell go env GOOS)
 ARCH ?= $(shell go env GOARCH)
 
-GO ?= GO111MODULE=on go
+GO ?= GO111MODULE=on CGO_ENABLED=0 go
 GO_LDFLAGS ?= -s -w -extldflags -static
 
 OUT := $(shell pwd)/_out
