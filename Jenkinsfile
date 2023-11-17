@@ -1,4 +1,4 @@
-def agentLabel = env.JOB_NAME.contains('main') ? "phx-large" : "large"
+def agentLabel = "2.0-large-phx"
 def BASE_IMAGE = ""
 
 pipeline {
