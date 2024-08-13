@@ -26,7 +26,7 @@ COPY --from=build_base /etc/group /etc/group
 COPY --from=build_base --chown=1000:webhook /home/webhook /home/webhook
 COPY --from=build_base --chown=1000:webhook /workspace/${EXEC_NAME} /home/webhook/${EXEC_NAME}
 
-COPY LICENSE SECURITY.md THIRD_PARTY_LICENSES.txt /licenses/
+COPY LICENSE.txt SECURITY.md THIRD_PARTY_LICENSES.txt /licenses/
 
 USER 1000
 
