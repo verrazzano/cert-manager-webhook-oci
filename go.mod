@@ -1,6 +1,6 @@
 module github.com/verrazzano/cert-manager-webhook-oci
 
-go 1.19
+go 1.21
 
 require (
 	github.com/cert-manager/cert-manager v1.9.1
